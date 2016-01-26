@@ -4,10 +4,19 @@
 			$this->rest='https://public-api.wordpress.com/rest/v1.1/';
 			$this->site=$this->rest.'sites/'.$site.'/';
 		}
-		function api($u,$params=[]){
+		function getAndCache($u){
+			$fn='cache/'.md5($u);
+			if(file_exists($fn) and $res=file_get_contents($fn))return $res;
+			if(!@$res=file_get_contents($u))return 'false';
+			file_put_contents($fn,$res);
+			return $res;
+		}
+		function api($u,$params=[],$cache=true){
 			$u=$this->site.$u.'?'.http_build_query($params);
-			$res=file_get_contents($u);
-			file_put_contents('cache/'.md5($u),$res);
+			if($cache)
+				$res=$this->getAndCache($u);
+			else
+				$res=file_get_contents($u);
 			return json_decode($res);
 		}
 		function found(){
@@ -16,6 +25,9 @@
 		function posts($queries=[]){
 			//ID,title,content,excerpt,slug,modified,featured_image,categories,tags
 			return $this->api('posts/',$queries);
+		}
+		function postWithSlug($slug){
+			return $this->api('posts/slug:'.$slug,['fields'=>'title,content,featured_image,categories,tags'],false);
 		}
 	}
 	
