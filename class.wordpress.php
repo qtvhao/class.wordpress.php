@@ -6,11 +6,16 @@
 		}
 		function api($u,$params=[]){
 			$u=$this->site.$u.'?'.http_build_query($params);
-			return json_decode(file_get_contents($u));
+			$res=file_get_contents($u);
+			file_put_contents('cache/'.md5($u),$res);
+			return json_decode($res);
 		}
-		/*function posts($fields='ID,title',$number=50,$offset=0){
+		function found(){
+			return $this->posts(['number'=>1,'fields'=>'ID'])->found;
+		}
+		function posts($queries=[]){
 			//ID,title,content,excerpt,slug,modified,featured_image,categories,tags
-			$queries=['fields'=>$fields,'number'=>$number,'offset'=>$offset];
 			return $this->api('posts/',$queries);
-		}*/
+		}
 	}
+	
